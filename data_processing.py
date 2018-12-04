@@ -1,7 +1,7 @@
 import sqlite3
 import csv
 import json
-import requests
+#import requests
 from secrets import *
 from bs4 import BeautifulSoup
 
