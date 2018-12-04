@@ -41,10 +41,14 @@ def drop_db():
     cur.execute(statement)
     conn.commit()
 
+    statement = 'DROP TABLE IF EXISTS YelpResults;'
+    cur.execute(statement)
+    conn.commit()
+
     conn.close()
     return
 
-# drop_db()
+ drop_db()
 
 def create_tables():
     # Connect to big10 database
@@ -109,6 +113,22 @@ def create_tables():
             '2017_std' INTEGER,
             '2018_avg' INTEGER,
             '2018_std' INTEGER,
+            FOREIGN KEY(zipcode_id) REFERENCES Zipcodes(Id)
+            );
+    '''
+    cur.execute(statement)
+
+    #create RentalPrices table
+    statement = '''
+        CREATE TABLE 'YelpResults' (
+            'Id' INTEGER PRIMARY KEY,
+            'zipcode_id' INTEGER,
+            'buisness_name' TEXT,
+            'lat' INTEGER,
+            'lon' INTEGER,
+            'buisness_price' TEXT,
+            'rating' INTEGER,
+            'site_url' TEXT,
             FOREIGN KEY(zipcode_id) REFERENCES Zipcodes(Id)
             );
     '''
@@ -232,7 +252,7 @@ def create_tables():
     conn.close()
     return
 
-# create_tables()
+ create_tables()
 
 #YelpAPI
 CACHE_YNAME = 'yelp_cache.json'
