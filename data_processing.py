@@ -45,10 +45,14 @@ def drop_db():
     cur.execute(statement)
     conn.commit()
 
+    statement = 'DROP TABLE IF EXISTS ZillowResults;'
+    cur.execute(statement)
+    conn.commit()
+
     conn.close()
     return
 
-drop_db()
+#drop_db()
 
 def create_tables():
     # Connect to big10 database
@@ -118,7 +122,7 @@ def create_tables():
     '''
     cur.execute(statement)
 
-    #create RentalPrices table
+    #create yelp table
     statement = '''
         CREATE TABLE 'YelpResults' (
             'Id' INTEGER PRIMARY KEY,
@@ -128,6 +132,25 @@ def create_tables():
             'lon' INTEGER,
             'buisness_price' TEXT,
             'rating' INTEGER,
+            'site_url' TEXT,
+            FOREIGN KEY(zipcode_id) REFERENCES Zipcodes(Id)
+            );
+    '''
+    cur.execute(statement)
+
+    #create zillow table
+    statement = '''
+        CREATE TABLE 'ZillowResults' (
+            'Id' INTEGER PRIMARY KEY,
+            'zipcode_id' INTEGER,
+            'ze_home_value' INTEGER,
+            'ze_rent_value' INTEGER,
+            'lat' INTEGER,
+            'lon' INTEGER,
+            'ze_home_high_value' INTEGER,
+            'ze_home_low_value' INTEGER,
+            'ze_rent_high_value' INTEGER,
+            'ze_rent_low_value' INTEGER,
             'site_url' TEXT,
             FOREIGN KEY(zipcode_id) REFERENCES Zipcodes(Id)
             );
@@ -252,7 +275,7 @@ def create_tables():
     conn.close()
     return
 
-create_tables()
+#create_tables()
 
 #YelpAPI
 CACHE_YNAME = 'yelp_cache.json'
@@ -425,6 +448,29 @@ def zillow_api(location, zip):
     params_diction["zws-id"]=ZWSID
     return make_request_using_cache_zillow(baseurl, params_diction)
 
+def populate_zillow_table(html_requests):
+    results=BeautifulSoup(html_requests,'html.parser')
+    zipcode=results.find('zipcode').text
+    lat=results.find('latitude').text
+    lon=results.find('longitude').text
+    zest_home=results.find('zestimate').find_all('amount')
+    for i in zest_home:
+        currency=i.find('amount')
+        print(currency)
+    print(zest_home)
 
+    # all_parks_list=parks.find_all('li', class_='clearfix')
+    # for li in all_parks_list:
+    #     #type of park
+    #     type=li.find('h2').text
+    #     #name of park
+    #     name=li.find('h3').text
+    #     #description of park
+    #     desc=li.find('p').text
+    #     #crawl to get the address
+    #     basicinfo_tag='/basicinfo.htm'
+    #     if li.find('a',href=lambda href: href and basicinfo_tag in href):
+    #         details_url=li.find('a')['href']
+    return
 
-#zillow_api('47568 Pembroke dr canton mi',48188)
+populate_zillow_table(zillow_api('47568 Pembroke dr canton mi',48188))
