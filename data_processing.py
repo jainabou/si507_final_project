@@ -52,7 +52,7 @@ def drop_db():
     conn.close()
     return
 
-#drop_db()
+
 
 def create_tables():
     # Connect to big10 database
@@ -132,6 +132,7 @@ def create_tables():
             'lon' INTEGER,
             'buisness_price' TEXT,
             'rating' INTEGER,
+            'category' TEXT,
             'site_url' TEXT,
             FOREIGN KEY(zipcode_id) REFERENCES Zipcodes(Id)
             );
@@ -275,7 +276,7 @@ def create_tables():
     conn.close()
     return
 
-#create_tables()
+
 
 #YelpAPI
 CACHE_YNAME = 'yelp_cache.json'
@@ -385,7 +386,7 @@ def yelp_api_zip(zipcode):
         err_statement='Sorry, no location was found for this zipcode. Please try another query.'
         return print(err_statement)
 
-# yelp_api_zip(48188)
+
 
 def yelp_api_address(location):
     #obtian the lon and lat for zipcode
@@ -415,6 +416,10 @@ def populate_yelp_table(json):
         if 'price' in i.keys():
             price=i['price']
         zipcode=i['location']['zip_code']
+        categories=i['categories'][0]['title']
+        # print(categories)
+        # for i in categories[0]
+        #     category=i[0]['name']
 
         statement='SELECT Id from Zipcodes WHERE Zipcode= "'+str(zipcode)+'" '
         #print(statement)
@@ -423,17 +428,17 @@ def populate_yelp_table(json):
         if i is not None:
             zipcode_id=i[0]
         print(zipcode_id)
-        insertion=(None,zipcode_id, name, lat, lon, price,rating,url)
+        insertion=(None,zipcode_id, name, lat, lon, price,rating,categories,url)
         # print(insertion)
         statement ='INSERT INTO "YelpResults" '
-        statement +='VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        statement +='VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)'
         cur.execute(statement, insertion)
     conn.commit()
 
     conn.close()
     return
 
-populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
+
 
 
 def zillow_api(location, zip):
@@ -494,4 +499,31 @@ def populate_zillow_table(html_requests):
 
     return
 
-populate_zillow_table(zillow_api('3810 saddlebrook ct upper marlboro md',20772))
+def zipcode_home_query(zipcode,query):
+    statement='SELECT s.Name, z.Zipcode,avg(i.mean_income), avg(i.median_income),avg(i.std_income), '
+
+    if query=='home':
+        statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN HousingPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
+    if query=='rent':
+        statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN RentalPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
+
+    if query=='yelp':
+        statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE '+"'"+str(zipcode)+"'"
+
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    cur.execute(statement)
+    results=cur.fetchall()
+    print(results)
+
+    return
+
+
+
+if __name__=="__main__":
+    # drop_db()
+    # create_tables()
+    # yelp_api_zip(48188)
+    # populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
+    # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
+    zipcode_home_query(48188,'home')
