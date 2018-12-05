@@ -454,8 +454,9 @@ def populate_zillow_table(html_requests):
     lat=results.find('latitude').text
     lon=results.find('longitude').text
     zest_home=results.find('zestimate').find_all('amount')
+    #print(zest_home)
     for i in zest_home:
-        currency=i.find('amount')
+        home_value=i.text
         print(currency)
     print(zest_home)
 
