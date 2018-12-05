@@ -1,7 +1,7 @@
 import sqlite3
 import csv
 import json
-#import requests
+import requests
 from secrets import *
 from bs4 import BeautifulSoup
 
@@ -453,27 +453,45 @@ def populate_zillow_table(html_requests):
     zipcode=results.find('zipcode').text
     lat=results.find('latitude').text
     lon=results.find('longitude').text
-    zest_home=results.find('zestimate').find_all('amount')
-    #print(zest_home)
-    for i in zest_home:
-        home_value=i.text
-        print(currency)
+    zest_home=results.find('zestimate').find('amount').text
     print(zest_home)
+    zest_home_range=results.find_all('zestimate')
+    for i in zest_home_range:
+        high_home=i.find('high').text
+        print(high_home)
+        low_home=i.find('low').text
+        print(low_home)
 
-    #gitupdate
+    zest_rent=results.find('rentzestimate').find('amount').text
+    print(zest_rent)
+    zest_rent_range=results.find_all('rentzestimate')
+    for i in zest_rent_range:
+        high_rent=i.find('high').text
+        print(high_rent)
+        low_rent=i.find('low').text
+        print(low_rent)
+    url=results.find('links').find('homedetails').text
+    print(url)
 
-    #all_parks_list=parks.find_all('li', class_='clearfix')
-    # for li in all_parks_list:
-    #     #type of park
-    #     type=li.find('h2').text
-    #     #name of park
-    #     name=li.find('h3').text
-    #     #description of park
-    #     desc=li.find('p').text
-    #     #crawl to get the address
-    #     basicinfo_tag='/basicinfo.htm'
-    #     if li.find('a',href=lambda href: href and basicinfo_tag in href):
-    #         details_url=li.find('a')['href']
+    #get zipcode id for entry
+    # Connect to big10 database
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    statement='SELECT Id from Zipcodes WHERE Zipcode= "'+str(zipcode)+'" '
+    #print(statement)
+    cur.execute(statement)
+    i=cur.fetchone()
+    if i is not None:
+        zipcode_id=i[0]
+    print(zipcode_id)
+    insertion=(None,zipcode_id, zest_home,zest_rent, lat, lon,high_home,low_home,high_rent,low_rent,url)
+    # print(insertion)
+    statement ='INSERT INTO "ZillowResults" '
+    statement +='VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    cur.execute(statement, insertion)
+    conn.commit()
+    conn.close()
+
     return
 
-populate_zillow_table(zillow_api('47568 Pembroke dr canton mi',48188))
+populate_zillow_table(zillow_api('3810 saddlebrook ct upper marlboro md',20772))
