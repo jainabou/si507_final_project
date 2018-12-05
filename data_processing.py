@@ -459,7 +459,9 @@ def populate_zillow_table(html_requests):
         print(currency)
     print(zest_home)
 
-    # all_parks_list=parks.find_all('li', class_='clearfix')
+    #gitupdate
+
+    #all_parks_list=parks.find_all('li', class_='clearfix')
     # for li in all_parks_list:
     #     #type of park
     #     type=li.find('h2').text
