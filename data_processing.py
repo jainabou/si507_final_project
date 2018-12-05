@@ -48,7 +48,7 @@ def drop_db():
     conn.close()
     return
 
- drop_db()
+drop_db()
 
 def create_tables():
     # Connect to big10 database
@@ -252,7 +252,7 @@ def create_tables():
     conn.close()
     return
 
- create_tables()
+create_tables()
 
 #YelpAPI
 CACHE_YNAME = 'yelp_cache.json'
@@ -374,7 +374,44 @@ def yelp_api_address(location):
     params_diction["location"] = location_str
     return make_request_using_cache_yelp(baseurl, params_diction)
 
-# yelp_api_address('47568 pembroke dr canton mi ')
+def populate_yelp_table(json):
+
+    buisness_list=json['businesses']
+    # Connect to big10 database
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    #create state table
+    for i in buisness_list:
+        zipcode_id=None
+        price=None
+        name=i['name']
+        url=i['url']
+        rating=i['rating']
+        lat=i['coordinates']['latitude']
+        lon=i['coordinates']['longitude']
+        if 'price' in i.keys():
+            price=i['price']
+        zipcode=i['location']['zip_code']
+
+        statement='SELECT Id from Zipcodes WHERE Zipcode= "'+str(zipcode)+'" '
+        #print(statement)
+        cur.execute(statement)
+        i=cur.fetchone()
+        if i is not None:
+            zipcode_id=i[0]
+        print(zipcode_id)
+        insertion=(None,zipcode_id, name, lat, lon, price,rating,url)
+        # print(insertion)
+        statement ='INSERT INTO "YelpResults" '
+        statement +='VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        cur.execute(statement, insertion)
+    conn.commit()
+
+    conn.close()
+    return
+
+populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
+
 
 def zillow_api(location, zip):
     location_str=str(location)
@@ -388,4 +425,6 @@ def zillow_api(location, zip):
     params_diction["zws-id"]=ZWSID
     return make_request_using_cache_zillow(baseurl, params_diction)
 
-zillow_api('47568 Pembroke dr canton mi',48188)
+
+
+#zillow_api('47568 Pembroke dr canton mi',48188)
