@@ -499,8 +499,8 @@ def populate_zillow_table(html_requests):
 
     return
 
-def zipcode_home_query(zipcode,query):
-    statement='SELECT s.Name, z.Zipcode,avg(i.mean_income), avg(i.median_income),avg(i.std_income), '
+def zipcode_query(zipcode,query):
+    statement='SELECT s.Name, z.Zipcode,z.lat,z.lon,avg(i.mean_income), avg(i.median_income),avg(i.std_income), '
 
     if query=='home':
         statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN HousingPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
@@ -508,15 +508,55 @@ def zipcode_home_query(zipcode,query):
         statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN RentalPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
 
     if query=='yelp':
-        statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE '+"'"+str(zipcode)+"'"
+        statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category, y.lat,y.lon FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+"'"+str(zipcode)+"'"
 
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
     cur.execute(statement)
     results=cur.fetchall()
-    print(results)
+    # print(results)
+
+    return results
+
+name_all=[]
+price_all=[]
+rating_all=[]
+category_all=[]
+lat_all=[]
+lon_all=[]
+
+def process_query_yelp(results):
+    name_all=[]
+    price_all=[]
+    rating_all=[]
+    category_all=[]
+    lat_all=[]
+    lon_all=[]
+
+    rating=None
+    name=None
+    price=None
+    category=None
+    lat=None
+    lon=None
+    for i in results:
+        name=i[2]
+        name_all.append(name)
+        price=i[3]
+        price_all.append(price)
+        rating=i[4]
+        rating_all.append(rating)
+        category=i[5]
+        category_all.append(category)
+        lat=i[6]
+        lat_all.append(lat)
+        lon=i[7]
+        lon_all.append(lon)
+
+    print(price_all)
 
     return
+
 
 
 
@@ -526,4 +566,4 @@ if __name__=="__main__":
     # yelp_api_zip(48188)
     # populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
     # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
-    zipcode_home_query(48188,'home')
+    process_query_yelp(zipcode_query(48188,'yelp'))
