@@ -4,6 +4,11 @@ import json
 import requests
 from secrets import *
 from bs4 import BeautifulSoup
+import plotly
+import sys
+import plotly.plotly as py
+import plotly.graph_objs as go
+import numpy as np
 
 
 # Part 1: Process the income csv file
@@ -508,7 +513,7 @@ def zipcode_query(zipcode,query):
         statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN RentalPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
 
     if query=='yelp':
-        statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category, y.lat,y.lon FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+"'"+str(zipcode)+"'"
+        statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category, y.lat,y.lon, z.lat,z.lon FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+"'"+str(zipcode)+"'"
 
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
@@ -524,14 +529,17 @@ rating_all=[]
 category_all=[]
 lat_all=[]
 lon_all=[]
+text_all=[]
+zip_lat=[]
+zip_lon=[]
 
 def process_query_yelp(results):
-    name_all=[]
-    price_all=[]
-    rating_all=[]
-    category_all=[]
-    lat_all=[]
-    lon_all=[]
+    # name_all=[]
+    # price_all=[]
+    # rating_all=[]
+    # category_all=[]
+    # lat_all=[]
+    # lon_all=[]
 
     rating=None
     name=None
@@ -548,15 +556,58 @@ def process_query_yelp(results):
         rating_all.append(rating)
         category=i[5]
         category_all.append(category)
+        text=str(name)+'\n'+str(category)+'\n'+str(rating)+'\n'+str(price)
+        text_all.append(text)
         lat=i[6]
         lat_all.append(lat)
         lon=i[7]
         lon_all.append(lon)
+        z_lat=i[8]
+        print(z_lat)
+        zip_lat.append(z_lat)
+        z_lon=i[9]
+        zip_lon.append(z_lon)
 
     print(price_all)
 
     return
+def yelp_plotly():
+    print(name_all)
+    data = [ dict(
+            type = 'scattermapbox',
+            locationmode = 'USA-states',
+            lon = lon_all,
+            lat = lat_all,
+            text = text_all,
+            mode = 'markers',
+            marker = dict(
+                size = 8,
+                symbol = 'star',
+            ))]
 
+
+    layout = dict(
+            title = 'Yelp Results',
+            autosize=True,
+            showlegend = False,
+            #specify that is it a mapbox object
+            mapbox=dict(
+                accesstoken=MAPBOX_TOKEN,
+                bearing=0,
+                center=dict(
+                    lat=zip_lat[0],#middle of country coordinates
+                    lon=zip_lon[0]
+                ),
+                pitch=0, #angle to view the map
+                zoom=11, #the zoom level , at 0, will show the entire world
+            ),
+        )
+
+    #complies the figure object based on parameters above
+    fig = dict(data=data, layout=layout )
+    #plotting it on Plotly
+    py.plot( fig, validate=False, filename='yelp_test' )
+    return
 
 
 
@@ -567,3 +618,4 @@ if __name__=="__main__":
     # populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
     # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
     process_query_yelp(zipcode_query(48188,'yelp'))
+    yelp_plotly()
