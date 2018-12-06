@@ -508,9 +508,9 @@ def zipcode_query(zipcode,query):
     statement='SELECT s.Name, z.Zipcode,z.lat,z.lon,avg(i.mean_income), avg(i.median_income),avg(i.std_income), '
 
     if query=='home':
-        statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN HousingPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
+        statement+='h.[2018_avg],h.[2018_std], h.[2017_avg],h.[2017_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN HousingPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
     if query=='rent':
-        statement+='h.[2018_avg],h.[2018_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN RentalPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
+        statement+='h.[2018_avg],h.[2018_std], h.[2017_avg],h.[2017_std] FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN RentalPrices as h ON z.Id=h.zipcode_id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
 
     if query=='yelp':
         statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category, y.lat,y.lon, z.lat,z.lon FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+"'"+str(zipcode)+"'"
@@ -607,9 +607,60 @@ def yelp_plotly():
     fig = dict(data=data, layout=layout )
     #plotting it on Plotly
     py.plot( fig, validate=False, filename='yelp_test' )
+
+
     return
 
+mean_income=0
+median_income=0
+std_income=0
+avg_homeprice=[]
+#std_homeprice=0
+state_name=None
+zipcode=None
+def process_query_income(results):
+    print(results)
+    global state_name
+    global mean_income
+    global std_income
+    global zipcode
+    state_name=results[0][0]
+    zipcode=results[0][1]
+    mean_income=results[0][4]
+    median_income=results[0][5]
+    std_income=results[0][6]
+    home_2018=results[0][7]
+    avg_homeprice.append(home_2018)
+    home_2018_w_pstd=results[0][8]+home_2018
+    avg_homeprice.append(home_2018_w_pstd)
+    home_2018_w_nstd=home_2018-results[0][8]
+    avg_homeprice.append(home_2018_w_nstd)
+    home_2017=results[0][9]
+    avg_homeprice.append(home_2017)
+    home_2017_w_pstd=results[0][10]+home_2017
+    avg_homeprice.append(home_2017_w_pstd)
+    home_2017_w_nstd=home_2017-results[0][10]
+    avg_homeprice.append(home_2017_w_nstd)
 
+    print(avg_homeprice)
+
+    return
+
+def homeprices_plotly():
+
+    trace0 = go.Box(
+        y=avg_homeprice,
+        name = 'Income Levels for '+str(zipcode)+' State:'+str(state_name),
+        marker = dict(
+            color = 'rgb(214, 12, 140)',
+        )
+    )
+
+    data = [trace0]
+    py.plot(data)
+
+
+    return
 
 if __name__=="__main__":
     # drop_db()
@@ -617,5 +668,8 @@ if __name__=="__main__":
     # yelp_api_zip(48188)
     # populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
     # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
-    process_query_yelp(zipcode_query(48188,'yelp'))
-    yelp_plotly()
+    #process_query_yelp(zipcode_query(48188,'yelp'))
+    #yelp_plotly()
+    process_query_income(zipcode_query(48188,'home'))
+    print(avg_homeprice)
+    homeprices_plotly()
