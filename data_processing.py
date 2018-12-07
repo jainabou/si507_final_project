@@ -365,6 +365,8 @@ def make_request_using_cache_zillow(baseurl, params):
         fw.close() # Close the open file
         return CACHE_DICTION[unique_ident]
 
+zip_lat=[]
+zip_lon=[]
 def yelp_api_zip(zipcode):
     #obtian the lon and lat for zipcode
     lat=None
@@ -376,7 +378,9 @@ def yelp_api_zip(zipcode):
     results=cur.fetchall()
     for i in results:
         lat=i[0]
+        zip_lat.append(lat)
         lon=i[1]
+        zip_lon.append(lon)
     conn.close()
     #print(lat)
     #print(lon)
@@ -530,8 +534,8 @@ category_all=[]
 lat_all=[]
 lon_all=[]
 text_all=[]
-zip_lat=[]
-zip_lon=[]
+# zip_lat=[]
+# zip_lon=[]
 
 def process_query_yelp(results):
     # name_all=[]
@@ -606,10 +610,10 @@ def yelp_plotly():
     #complies the figure object based on parameters above
     fig = dict(data=data, layout=layout )
     #plotting it on Plotly
-    py.plot( fig, validate=False, filename='yelp_test' )
+    #py.plot( fig, validate=False, filename='yelp_test' )
+    div=plotly.offline.plot(fig,show_link=False,output_type='div',validate=False, include_plotlyjs=True)
 
-
-    return
+    return div
 
 mean_income=0
 median_income=0
@@ -657,19 +661,20 @@ def homeprices_plotly():
     )
 
     data = [trace0]
-    py.plot(data)
+    #py.plot(data)
+    div=plotly.offline.plot(data,show_link=False,output_type='div', include_plotlyjs=True)
+    #print(div)
 
+    return div
 
-    return
-
-if __name__=="__main__":
+# if __name__=="__main__":
     # drop_db()
     # create_tables()
-    # yelp_api_zip(48188)
-    # populate_yelp_table(yelp_api_address('47568 pembroke dr canton mi '))
-    # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
-    #process_query_yelp(zipcode_query(48188,'yelp'))
-    #yelp_plotly()
-    process_query_income(zipcode_query(48188,'home'))
-    print(avg_homeprice)
-    homeprices_plotly()
+    # yelp_api_zip(20772)
+    # populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
+    # # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
+    # process_query_yelp(zipcode_query(20772,'yelp'))
+    # #yelp_plotly()
+    # process_query_income(zipcode_query(20772,'home'))
+    # #print(avg_homeprice)
+    # homeprices_plotly()
