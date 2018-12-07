@@ -390,6 +390,7 @@ def yelp_api_zip(zipcode):
         params_diction["term"] = 'restaurants'
         params_diction["latitude"] = lat
         params_diction["longitude"] = lon
+        params_diction['limit']=50
         return make_request_using_cache_yelp(baseurl, params_diction)
     else:
         err_statement='Sorry, no location was found for this zipcode. Please try another query.'
@@ -436,7 +437,7 @@ def populate_yelp_table(json):
         i=cur.fetchone()
         if i is not None:
             zipcode_id=i[0]
-        print(zipcode_id)
+        #print(zipcode_id)
         insertion=(None,zipcode_id, name, lat, lon, price,rating,categories,url)
         # print(insertion)
         statement ='INSERT INTO "YelpResults" '
@@ -485,7 +486,7 @@ def populate_zillow_table(html_requests):
         low_rent=i.find('low').text
         print(low_rent)
     url=results.find('links').find('homedetails').text
-    print(url)
+    #print(url)
 
     #get zipcode id for entry
     # Connect to big10 database
@@ -497,7 +498,7 @@ def populate_zillow_table(html_requests):
     i=cur.fetchone()
     if i is not None:
         zipcode_id=i[0]
-    print(zipcode_id)
+    #print(zipcode_id)
     insertion=(None,zipcode_id, zest_home,zest_rent, lat, lon,high_home,low_home,high_rent,low_rent,url)
     # print(insertion)
     statement ='INSERT INTO "ZillowResults" '
@@ -519,13 +520,38 @@ def zipcode_query(zipcode,query):
     if query=='yelp':
         statement='SELECT s.Name,z.Zipcode,y.buisness_name, y.buisness_price,y.rating, y.category, y.lat,y.lon, z.lat,z.lon FROM YelpResults as y JOIN Zipcodes as z ON y.zipcode_id=z.Id JOIN States as s ON z.state_id=s.Id WHERE z.Zipcode= '+"'"+str(zipcode)+"'"
 
+    if query=='zillow':
+        statement+='h.[2018_avg],h.[2018_std], r.[2018_avg],r.[2018_std],l.ze_home_value, l.ze_rent_value, l.site_url, l.lat, l.lon FROM IncomeLevels as i JOIN Zipcodes as z ON i.zipcode_id=z.Id JOIN HousingPrices as h ON z.Id=h.zipcode_id JOIN RentalPrices as r ON z.Id=r.zipcode_id JOIN States as s ON z.state_id=s.Id JOIN ZillowResults as l ON z.Id=l.zipcode_id WHERE z.Zipcode= '+ "'"+str(zipcode)+"'"
+
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
     cur.execute(statement)
     results=cur.fetchall()
-    # print(results)
+    #print(statement)
 
     return results
+
+def process_query_zillow(results):
+    state_name=results[0][0]
+    zipcode=results[0][1]
+    mean_income=results[0][4]
+    mean_income='${:,.2f}'.format(mean_income)
+    median_income=results[0][5]
+    median_income='${:,.2f}'.format(median_income)
+    std_income=results[0][6]
+    std_income='${:,.2f}'.format(std_income)
+    home_2018=results[0][7]
+    home_2018='${:,.2f}'.format(home_2018)
+    rent_2018=results[0][9]
+    rent_2018='${:,.2f}'.format(rent_2018)
+
+    ze_home=results[0][11]
+    ze_home='${:,.2f}'.format(ze_home)
+    ze_rent=results[0][12]
+    ze_rent='${:,.2f}'.format(ze_rent)
+    site_url=results[0][13]
+
+    return [mean_income,home_2018,rent_2018,ze_home,ze_rent,site_url]
 
 name_all=[]
 price_all=[]
@@ -538,6 +564,8 @@ text_all=[]
 # zip_lon=[]
 
 def process_query_yelp(results):
+    global name_all
+    name_all=[]
     # name_all=[]
     # price_all=[]
     # rating_all=[]
@@ -567,12 +595,12 @@ def process_query_yelp(results):
         lon=i[7]
         lon_all.append(lon)
         z_lat=i[8]
-        print(z_lat)
+        #print(z_lat)
         zip_lat.append(z_lat)
         z_lon=i[9]
         zip_lon.append(z_lon)
 
-    print(price_all)
+    #print(price_all)
 
     return
 def yelp_plotly():
@@ -623,16 +651,22 @@ avg_homeprice=[]
 state_name=None
 zipcode=None
 def process_query_income(results):
-    print(results)
+    #print(results)
+    global avg_homeprice
+    avg_homeprice=[]
     global state_name
     global mean_income
+    global median_income
     global std_income
     global zipcode
     state_name=results[0][0]
     zipcode=results[0][1]
     mean_income=results[0][4]
+    mean_income='${:,.2f}'.format(mean_income)
     median_income=results[0][5]
+    median_income='${:,.2f}'.format(median_income)
     std_income=results[0][6]
+    std_income='${:,.2f}'.format(std_income)
     home_2018=results[0][7]
     avg_homeprice.append(home_2018)
     home_2018_w_pstd=results[0][8]+home_2018
@@ -646,9 +680,9 @@ def process_query_income(results):
     home_2017_w_nstd=home_2017-results[0][10]
     avg_homeprice.append(home_2017_w_nstd)
 
-    print(avg_homeprice)
+    #print(avg_homeprice)
 
-    return
+    return [mean_income,std_income,median_income]
 
 def homeprices_plotly():
 
@@ -667,13 +701,13 @@ def homeprices_plotly():
 
     return div
 
-# if __name__=="__main__":
-    # drop_db()
-    # create_tables()
-    # yelp_api_zip(20772)
-    # populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
-    # # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
-    # process_query_yelp(zipcode_query(20772,'yelp'))
+if __name__=="__main__":
+    drop_db()
+    create_tables()
+    # populate_yelp_table(yelp_api_zip(20772))
+    #populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
+    populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
+    zipcode_query(48188,'zillow')
     # #yelp_plotly()
     # process_query_income(zipcode_query(20772,'home'))
     # #print(avg_homeprice)

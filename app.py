@@ -7,23 +7,24 @@ app = Flask(__name__)
 
 zipcode=None
 query=None
-
+address=None
 @app.route('/')
 def index():
     return '''
         <h1>Zipcode Information Finder!</h1>
         <ul>
             <li><a href="/homesearch"> Search ZipCode </a></li>
+            <li><a href="/addressearch"> Search Address </a></li>
         </ul>
     '''
 
+@app.route('/addressearch', methods=['GET', 'POST'])
+def aball():
+
+    return render_template("address_page.html")
+
 @app.route('/homesearch', methods=['GET', 'POST'])
 def fball():
-    # if request.method == 'POST':
-    #     zipcode = request.form['zipcode']
-    #     #sortorder = request.form['sortorder']
-    #     #seasons = model.get_football_seasons(sortby, sortorder)
-    #     print(zipcode)
 
     return render_template("home_page.html")
     #return redirect("/")
@@ -43,13 +44,70 @@ def postentry():
         data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
         return redirect('/homeplotly')
     if query=='yelp':
-        data_processing.yelp_api_zip(zipcode)
+        data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
         data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
         return redirect('/yelpplotly')
+    if query=='income':
+
+        return redirect('/incomedata')
+    if query=='zillow':
+
+        return redirect('/zillowinfo')
             # #yelp_plotly()
 #    message = request.form["message"]
     #rint(query)
     return redirect("/")
+
+@app.route("/postentryzillow", methods=["POST"])
+def postentryzillow():
+    #print(request.form)
+    global zipcode
+    global query
+    global address
+    zipcode = request.form["name"]
+    query=request.form["value"]
+    street=request.form["address"]
+    citystate=request.form["citystate"]
+    address=str(street)+' '+str(citystate)
+    if query=='home':
+        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'home'))
+        return redirect('/homeplotly')
+    if query =='rent':
+        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
+        return redirect('/homeplotly')
+    if query=='yelp':
+        data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
+        data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
+        return redirect('/yelpplotly')
+    if query=='income':
+
+        return redirect('/incomedata')
+    if query=='zillow':
+        data_processing.populate_zillow_table(data_processing.zillow_api(address,zipcode))
+        return redirect('/zillowinfo')
+            # #yelp_plotly()
+#    message = request.form["message"]
+    #rint(query)
+    return redirect("/")
+
+@app.route("/incomedata")
+def incomedata():
+    g=data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
+    mean=g[0]
+    std=g[1]
+    median=g[2]
+    return render_template("incomedata.html", mean=mean,  std=std, median=median, zipcode=zipcode)
+
+@app.route("/zillowinfo")
+def zillowdata():
+    g=data_processing.process_query_zillow(data_processing.zipcode_query(zipcode,'zillow'))
+    mean=g[0]
+    home_2018=g[1]
+    rent_2018=g[2]
+    ze_home=g[3]
+    ze_rent=g[4]
+    url=g[5]
+    return render_template("zillow_page.html", mean=mean,  home_2018=home_2018, rent_2018=rent_2018, zipcode=zipcode, address=address,ze_home=ze_home, ze_rent=ze_rent, url=url)
 
 @app.route('/yelpplotly')
 def yelp_plot():
@@ -65,12 +123,10 @@ def home_price():
 def deleteentry():
     #id = request.form["id"]
     #model1.delete_entry(id)
-    return redirect("/homesearch")
+    return redirect("/")
 
 if __name__ == '__main__':
     data_processing.drop_db()
     data_processing.create_tables()
-    #data_processing.process_query_income(data_processing.zipcode_query(20772,'home'))
-#    homeprices_plotly()
-#    print(data_processing.avg_homeprice)
+
     app.run(debug=True)
