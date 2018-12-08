@@ -8,7 +8,7 @@ import plotly
 import sys
 import plotly.plotly as py
 import plotly.graph_objs as go
-import numpy as np
+#import numpy as np
 
 
 # Part 1: Process the income csv file
@@ -369,6 +369,11 @@ zip_lat=[]
 zip_lon=[]
 def yelp_api_zip(zipcode):
     #obtian the lon and lat for zipcode
+    global zip_lon
+    global zip_lat
+
+    zip_lon=[]
+    zip_lat=[]
     lat=None
     lon=None
     conn = sqlite3.connect(DBNAME)
@@ -531,6 +536,90 @@ def zipcode_query(zipcode,query):
 
     return results
 
+def yelp_count_query(zipcode):
+
+    one_dollar=None
+    two_dollar=None
+    three_dollar=None
+    four_dollar=None
+    statement='SELECT buisness_price,Count(buisness_price) FROM YelpResults JOIN Zipcodes ON Zipcodes.Id=YelpResults.zipcode_id WHERE Zipcodes.Zipcode= '+ "'"+str(zipcode)+"'"
+    statement+=' GROUP BY YelpResults.buisness_price'
+
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    cur.execute(statement)
+    results=cur.fetchall()
+    #print(results)
+
+    price_count_list=[]
+    price_list=[]
+
+    it_amt=len(results)
+    cycle=0
+
+    #next(results)
+    while cycle!=it_amt:
+        rating=results[cycle][0]
+        price_list.append(rating)
+        count=results[cycle][1]
+        price_count_list.append(count)
+        cycle +=1
+
+    print(price_count_list)
+    print(price_list)
+
+
+
+    statement='SELECT rating,Count(rating) FROM YelpResults JOIN Zipcodes ON Zipcodes.Id=YelpResults.zipcode_id WHERE Zipcodes.Zipcode= '+ "'"+str(zipcode)+"'"
+    statement+=' GROUP BY YelpResults.rating'
+
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    cur.execute(statement)
+    results=cur.fetchall()
+    print(results)
+
+    rating_count_list=[]
+    rating_list=[]
+
+    rat_amt=len(results)
+    rat_cycle=0
+
+    while rat_cycle!=rat_amt:
+        rating=str(results[rat_cycle][0])
+        rating_list.append(rating)
+        count=results[rat_cycle][1]
+        rating_count_list.append(count)
+        rat_cycle +=1
+
+    print(rating_count_list)
+    print(rating_list)
+
+
+    return [price_count_list, price_list, rating_count_list, rating_list]
+
+def yelp_pie_plotly(result_list):
+
+    price_list=result_list[1]
+    price_count_list=result_list[0]
+
+    trace=go.Pie(labels=price_list, values=price_count_list)
+    data=[trace]
+    #py.plot([trace], filename='price count')
+
+    div1=plotly.offline.plot(data,show_link=False,output_type='div',validate=False, include_plotlyjs=True)
+
+    rating_list=result_list[3]
+    rating_count_list=result_list[2]
+
+    trace=go.Bar(x=rating_list, y=rating_count_list)
+    data1=[trace]
+    div2=plotly.offline.plot(data1,show_link=False,output_type='div',validate=False, include_plotlyjs=True)
+    #py.plot(data, filename='rating count')
+
+    return [div1,div2]
+
+
 def process_query_zillow(results):
     state_name=results[0][0]
     zipcode=results[0][1]
@@ -565,13 +654,19 @@ text_all=[]
 
 def process_query_yelp(results):
     global name_all
+    global price_all
+    global rating_all
+    global category_all
+    global lon_all
+    global lat_all
+    global text_all
     name_all=[]
-    # name_all=[]
-    # price_all=[]
-    # rating_all=[]
-    # category_all=[]
-    # lat_all=[]
-    # lon_all=[]
+    name_all=[]
+    price_all=[]
+    rating_all=[]
+    category_all=[]
+    lat_all=[]
+    lon_all=[]
 
     rating=None
     name=None
@@ -615,6 +710,7 @@ def yelp_plotly():
             marker = dict(
                 size = 8,
                 symbol = 'star',
+                color='rgb(120, 0, 0)'
             ))]
 
 
@@ -702,12 +798,13 @@ def homeprices_plotly():
     return div
 
 if __name__=="__main__":
-    drop_db()
-    create_tables()
+    # drop_db()
+    # create_tables()
     # populate_yelp_table(yelp_api_zip(20772))
-    #populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
-    populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
-    zipcode_query(48188,'zillow')
+    # populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
+    yelp_pie_plotly(yelp_count_query('20772'))
+    # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
+    # zipcode_query(48188,'zillow')
     # #yelp_plotly()
     # process_query_income(zipcode_query(20772,'home'))
     # #print(avg_homeprice)

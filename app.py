@@ -112,7 +112,10 @@ def zillowdata():
 @app.route('/yelpplotly')
 def yelp_plot():
     plot=data_processing.yelp_plotly()
-    return render_template("yelp_page.html", seasons=plot, zipcode=zipcode, query=query)
+    plot2=data_processing.yelp_pie_plotly(data_processing.yelp_count_query(zipcode))
+    pie_chart=plot2[0]
+    bar_chart=plot2[1]
+    return render_template("yelp_page.html", seasons=plot,pie_chart=pie_chart,bar_chart=bar_chart, zipcode=zipcode, query=query)
 
 @app.route('/homeplotly')
 def home_price():
