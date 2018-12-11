@@ -37,7 +37,7 @@ Enter in a US Zipcode and the information wou want <br>
 Zipcode+Home: Returns boxplot of housing prices in that zipcode
 Zipcode+Rent: Returns boxplot of rent prices in that zipcode
 Zipcode+Yelp: Returns map of yelp resturaunts in that zipcode with hover information of name and type, piechart of price range of results, and barchart of ratings in results <br>
-Zipcode+Income: Returns mean, median, and standard deviation annual income for the zipcodes
+Zipcode+Income: Returns mean, median, and standard deviation annual income for the zipcodes<br>
 <b><i> Address Search </b></i><br>
 Enter in a US Address and the information wou want <br>
 Address+Home: Returns boxplot of housing prices in that zipcode
