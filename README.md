@@ -4,15 +4,17 @@
 This project provides information for a US zipcode or address. The information provided is average income, average housing prices, average rent prices,  and yelp resturaunt information in a flask app with plotly outputs. 
 
 <b> Data Sources Used </b> <br>
-Zillow API: API request from Zillow(https://www.zillow.com/howto/api/GetSearchResults.htm) and return the Zestimate data for homes in that zipcode
+Zillow API: API request from Zillow(https://www.zillow.com/howto/api/GetSearchResults.htm) and return the Zestimate data for homes in that zipcode. 
 
 Yelp API: API request from Yelp(https://www.yelp.com/developers/documentation/v3/business_search) and return the restaurants in that zipcode + the types of restaurants + attributes
 
-US household Income Stats: Kaggle csv file (https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations#kaggle_income.csv) 
+US household Income Stats: Kaggle csv file (https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations#kaggle_income.csv) Repository File Name:(kaggle_input.csv)
 
-Zillow Research Housing and Rental Data: CSV file for Housing and Rental average values (https://www.zillow.com/research/data/)
+Zillow Research Housing and Rental Data: CSV file for Housing and Rental average values (https://www.zillow.com/research/data/) Repository File Name:(home_sales-zip.csv, rental_proces-zip.csv)
 
-US State Names and Abbreviations: CSV File used in Database (http://www.fonz.net/blog/archives/2008/04/06/csv-of-states-and-state-abbreviation)
+US State Names and Abbreviations: CSV File used in Database (http://www.fonz.net/blog/archives/2008/04/06/csv-of-states-and-state-abbreviation) Repository File Name:(states.csv)
+
+US Zipcodes and Longitude+Latitude: CSV file use in Database to provide the longitude and latitude for each zipcode in US and the state it belongs into (http://federalgovernmentzipcodes.us/) Repository File Name:(zip_code_states.csv)
 
 <b> Things Needed to Run Program </b> <br>
 Yelp API Key, Zillow API authentication, Plotly Key, Mapbox Key. Please refer to requirments.txt for modules needed to run program
