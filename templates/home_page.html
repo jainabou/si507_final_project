@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<h1> Please type zipcode to search... </h1>
+
+<form action="/postentryzip" method="POST">
+    <p>Zipcode: <input type="text" name="name"/></p>
+    <p>
+      <label>Select type</label>
+      <select id = "myList" name='value'>
+        <option value = "home">home</option>
+        <option value = "rent">rent</option>
+        <option value = "yelp">yelp</option>
+        <option value = "income">income</option>
+        <!-- <option value = "3">three</option>
+        <option value = "4">four</option> -->
+      </select>
+      </p>
+    <p><input type="submit" value="Submit"/></p>
+</form>

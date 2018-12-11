@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<h1> Please type zipcode to search... </h1>
+
+<form action="/postentryzillow" method="POST">
+    <p> No commas in all fields below only spaces to seperate words</p>
+    <p>Street Address: <input type="text" name="address"/></p>
+    <p>City State: <input type="text" name="citystate"/></p>
+    <p>Zipcode: <input type="text" name="name"/></p>
+    <p>
+      <label>Select type</label>
+      <select id = "myList" name='value'>
+        <option value = "home">home</option>
+        <option value = "rent">rent</option>
+        <option value = "yelp">yelp</option>
+        <option value = "income">income</option>
+        <option value = "zillow">zillow</option>
+        <!-- <option value = "3">three</option>
+        <option value = "4">four</option> -->
+      </select>
+      </p>
+    <p><input type="submit" value="Submit"/></p>
+</form>

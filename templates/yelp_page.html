@@ -1,0 +1,27 @@
+
+<link rel="stylesheet" href="/static/style.css">
+
+<h1> {{query}} resturaunts for {{zipcode}} </h1>
+
+{{seasons|safe}}
+
+<h2> Pie Chart of Price Range</h2>
+
+{{pie_chart|safe}}
+
+<h2> Bar Chart of Ratings</h2>
+
+{{bar_chart|safe}}
+
+<div class="entry">
+  <form action="/back" method="POST">
+      <!-- <p>id: <input type="hidden" name ="id" value='back'</p> -->
+      <p><input type="submit" value="back"/></p>
+  </form>
+</div>
+<!-- <div id="tester" style="width:600px;height:250px;">
+  <scripts>
+    seasons
+  </scripts>
+
+</div> -->
