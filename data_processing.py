@@ -315,7 +315,7 @@ def params_unique_combination(baseurl, params):#combine URL and parameter for
     for k in alphabetized_keys:
         res.append("{}={}".format(k, params[k]))
     URL=baseurl + "&".join(res)
-    print(URL)
+    #print(URL)
     return URL
 
 def make_request_using_cache_yelp(baseurl, params):
@@ -326,11 +326,11 @@ def make_request_using_cache_yelp(baseurl, params):
 
     ## first, look in the cache to see if we already have this data
     if unique_ident in CACHE_DICTION:
-            print("Getting cached data...")
+            #print("Getting cached data...")
             return CACHE_DICTION[unique_ident]
     else:
         #if not, run the API request
-        print("Making a request for new data...")
+        #print("Making a request for new data...")
         # Make the request and cache the new data
         resp = requests.get(url=baseurl, params=params, headers=headers)
         print(resp.text)
@@ -349,11 +349,11 @@ def make_request_using_cache_zillow(baseurl, params):
 
     ## first, look in the cache to see if we already have this data
     if unique_ident in CACHE_DICTION:
-            print("Getting cached data...")
+            #print("Getting cached data...")
             return CACHE_DICTION[unique_ident]
     else:
         #if not, run the API request
-        print("Making a request for new data...")
+        #print("Making a request for new data...")
         # Make the request and cache the new data
         resp = requests.get(baseurl, params)
         res_soup=BeautifulSoup(resp.text, 'html.parser')
@@ -474,22 +474,22 @@ def populate_zillow_table(html_requests):
     lat=results.find('latitude').text
     lon=results.find('longitude').text
     zest_home=results.find('zestimate').find('amount').text
-    print(zest_home)
+    #print(zest_home)
     zest_home_range=results.find_all('zestimate')
     for i in zest_home_range:
         high_home=i.find('high').text
-        print(high_home)
+        #print(high_home)
         low_home=i.find('low').text
-        print(low_home)
+        #print(low_home)
 
     zest_rent=results.find('rentzestimate').find('amount').text
-    print(zest_rent)
+    #print(zest_rent)
     zest_rent_range=results.find_all('rentzestimate')
     for i in zest_rent_range:
         high_rent=i.find('high').text
-        print(high_rent)
+        #print(high_rent)
         low_rent=i.find('low').text
-        print(low_rent)
+        #print(low_rent)
     url=results.find('links').find('homedetails').text
     #print(url)
 
@@ -565,8 +565,8 @@ def yelp_count_query(zipcode):
         price_count_list.append(count)
         cycle +=1
 
-    print(price_count_list)
-    print(price_list)
+    #print(price_count_list)
+    #print(price_list)
 
 
 
@@ -577,7 +577,7 @@ def yelp_count_query(zipcode):
     cur = conn.cursor()
     cur.execute(statement)
     results=cur.fetchall()
-    print(results)
+    #print(results)
 
     rating_count_list=[]
     rating_list=[]
@@ -592,8 +592,8 @@ def yelp_count_query(zipcode):
         rating_count_list.append(count)
         rat_cycle +=1
 
-    print(rating_count_list)
-    print(rating_list)
+    #print(rating_count_list)
+    #print(rating_list)
 
 
     return [price_count_list, price_list, rating_count_list, rating_list]
@@ -797,12 +797,12 @@ def homeprices_plotly():
 
     return div
 
-if __name__=="__main__":
+# if __name__=="__main__":
     # drop_db()
     # create_tables()
     # populate_yelp_table(yelp_api_zip(20772))
     # populate_yelp_table(yelp_api_address('3810 saddlebrook ct upper marlboro md '))
-    yelp_pie_plotly(yelp_count_query('20772'))
+    #yelp_pie_plotly(yelp_count_query('20772'))
     # populate_zillow_table(zillow_api('47568 pembroke dr canton mi',48188))
     # zipcode_query(48188,'zillow')
     # #yelp_plotly()
