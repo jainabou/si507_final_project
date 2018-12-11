@@ -35,28 +35,36 @@ def postentry():
     #print(request.form)
     global zipcode
     global query
-    zipcode = request.form["name"]
-    query=request.form["value"]
-    if query=='home':
-        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'home'))
-        return redirect('/homeplotly')
-    if query =='rent':
-        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
-        return redirect('/homeplotly')
-    if query=='yelp':
-        data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
-        data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
-        return redirect('/yelpplotly')
-    if query=='income':
+    try:
+        zipcode = request.form["name"]
+        query=request.form["value"]
+        if query=='home':
+            data_processing.process_query_income(data_processing.zipcode_query(zipcode,'home'))
+            return redirect('/homeplotly')
+        if query =='rent':
+            data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
+            return redirect('/homeplotly')
+        if query=='yelp':
+            data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
+            data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
+            return redirect('/yelpplotly')
+        if query=='income':
 
-        return redirect('/incomedata')
-    if query=='zillow':
+            return redirect('/incomedata')
+        if query=='zillow':
 
-        return redirect('/zillowinfo')
-            # #yelp_plotly()
-#    message = request.form["message"]
-    #rint(query)
-    return redirect("/")
+            return redirect('/zillowinfo')
+                # #yelp_plotly()
+    #    message = request.form["message"]
+        #rint(query)
+        return redirect("/")
+    except:
+        return redirect("/helppage")
+
+@app.route('/helppage', methods=['GET', 'POST'])
+def helppage():
+
+    return render_template("error_page.html")
 
 @app.route("/postentryzillow", methods=["POST"])
 def postentryzillow():
@@ -64,31 +72,34 @@ def postentryzillow():
     global zipcode
     global query
     global address
-    zipcode = request.form["name"]
-    query=request.form["value"]
-    street=request.form["address"]
-    citystate=request.form["citystate"]
-    address=str(street)+' '+str(citystate)
-    if query=='home':
-        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'home'))
-        return redirect('/homeplotly')
-    if query =='rent':
-        data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
-        return redirect('/homeplotly')
-    if query=='yelp':
-        data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
-        data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
-        return redirect('/yelpplotly')
-    if query=='income':
+    try:
+        zipcode = request.form["name"]
+        query=request.form["value"]
+        street=request.form["address"]
+        citystate=request.form["citystate"]
+        address=str(street)+' '+str(citystate)
+        if query=='home':
+            data_processing.process_query_income(data_processing.zipcode_query(zipcode,'home'))
+            return redirect('/homeplotly')
+        if query =='rent':
+            data_processing.process_query_income(data_processing.zipcode_query(zipcode,'rent'))
+            return redirect('/homeplotly')
+        if query=='yelp':
+            data_processing.populate_yelp_table(data_processing.yelp_api_zip(zipcode))
+            data_processing.process_query_yelp(data_processing.zipcode_query(zipcode,'yelp'))
+            return redirect('/yelpplotly')
+        if query=='income':
 
-        return redirect('/incomedata')
-    if query=='zillow':
-        data_processing.populate_zillow_table(data_processing.zillow_api(address,zipcode))
-        return redirect('/zillowinfo')
-            # #yelp_plotly()
-#    message = request.form["message"]
-    #rint(query)
-    return redirect("/")
+            return redirect('/incomedata')
+        if query=='zillow':
+            data_processing.populate_zillow_table(data_processing.zillow_api(address,zipcode))
+            return redirect('/zillowinfo')
+                # #yelp_plotly()
+    #    message = request.form["message"]
+        #rint(query)
+        return redirect("/")
+    except:
+        return redirect("/helppage")
 
 @app.route("/incomedata")
 def incomedata():
